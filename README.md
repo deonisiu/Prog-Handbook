@@ -6,7 +6,8 @@
 
 ## Разделы
 
-* [Algorithms(алгоритмы)](algorithms/)
+* [Algorithms(алгоритмы)](src/algorithms/)
+* [LISP](src/lisp/)
 
 ## Фундамент для программиста
 
