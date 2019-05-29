@@ -7,7 +7,11 @@
 ## Разделы
 
 * [Algorithms(алгоритмы)](src/algorithms/)
+* [Assembler Основы](assem.md)
+* [C#](src/cs/)
 * [LISP](src/lisp/)
+
+
 
 ## Фундамент для программиста
 
