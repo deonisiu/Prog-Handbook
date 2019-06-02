@@ -55,8 +55,8 @@ TraceSource.TraceInformation
 ```c#
 string name = "Fred";
 int age = 33;
-Console.WriteLine("Name = {0}, age = {1}", name, age);
-// Output : "Name = Fred, age = 33"
+Console.WriteLine("Имя = {0}, возраст = {1}", name, age);
+// Output : "Имя = Fred, возраст = 33"
 ```
 
 ### [&uarr;](#0)  <a name="1_2">2) Интерполяция строк - внедрение любого выражения в строку </a>
@@ -69,7 +69,7 @@ Console.WriteLine("Name = {0}, age = {1}", name, age);
 string name = "Tom";
 int age = 22;
 Console.WriteLine($"Hello, {name}! Your age is {age}"); // стандартная интерполяция
-Console.WriteLine($"{name} is {age} year{(age == 1 ? "" : "s")} old."); // условный оператор
+Console.WriteLine($"{name} is {age} year{(age == 1 ? "true" : "false")} old."); // условный оператор
 ```
 
 ---
@@ -88,7 +88,7 @@ ushort  - System.UInt16  (2 bytes):0...65.535
 int     - System.Int32   (4 bytes):-2.147.483.648...2.147.483.647 (int a = 5)
 uint    - System.UInt32  (4 bytes):0...4.294.967.295 (uint a = 5u)
 long    - System.Int64   (8 bytes):-9.223.372.036.854.775.808...9.223.372.036.854.775.807 (long a = 5l)
-ulong   - System.UInt64  (4 bytes):0...18.446.744.073.709.551.615 (ulong a = 5ul)
+ulong   - System.UInt64  (8 bytes):0...18.446.744.073.709.551.615 (ulong a = 5ul)
 float   - System.Single  (4 bytes):-3.4*10^38...3.4*10^38 (float a = 3.14f)
 double  - System.Double  (8 bytes):+-5.0*10^-324...+-1.7*10^308 (double a = 3.14) (15 знаков после запятой)
 decimal - System.Decimal (16bytes):+-1.0*10^-28...+-7.9228*10^28 (decimal a = 3.14m) (28 знаков после запятой)
@@ -176,7 +176,7 @@ a >>= 2;    // = 4  =     100b
 a &= 6;     // = 4  =     100b
             // 9    =   +1001b
 a |= 9;     // = 13 =    1101b
-            // 15   =    1111b
+            // 15   =   ^1111b
 a ^= 15;    // = 2  =    0010b
 ```
 
@@ -362,9 +362,9 @@ for(int i=0; i<rows; i++) {
 * Размерность каждого подмассива может не совпадать
 ```c#
 int[][] nums1 = new int[3][];
-nums[0] = new int[2] { 1, 2 };          // выделяем память для первого подмассива
-nums[1] = new int[3] { 1, 2, 3 };       // выделяем память для второго подмассива
-nums[2] = new int[5] { 1, 2, 3, 4, 5 }; // выделяем память для третьего подмассива
+nums1[0] = new int[2] { 1, 2 };          // выделяем память для первого подмассива
+nums1[1] = new int[3] { 1, 2, 3 };       // выделяем память для второго подмассива
+nums1[2] = new int[5] { 1, 2, 3, 4, 5 }; // выделяем память для третьего подмассива
 
 // В качестве подмасивов могут быть многомерные массивы
 int[][,] nums2 = new int[3][,] 
@@ -493,8 +493,8 @@ static int Fibonachi(int n) {
 * Стандартно каждому элементу присваивается целочисленное значение начиная с 0
 ```c#
 // значения по умолчанию
-enum Days {
-	Monday,    // = 0
+enum Days : byte {
+  Monday,    // = 0
   Tuesday,   // = 1
   Wednesday, // = 2
   Thursday,  // = 3
@@ -567,3 +567,249 @@ private static (int, int) GetValues() {
 ```
 
 ### [&uarr;](#0)  <a name="3">Классы (ООП)</a>
+* Описанием ***объекта*** является ***класс***
+* ***Объект*** представляет экземпляр ***класса***
+* Вся функциональность класса выражена его :
+	* ***Конструктором*** - `public Person() { name = "Tom"; age = 19; }`
+	* ***Полями*** - `string name; int age;`
+	* ***Свойствами*** - `public string Name { get; set; }`
+	* ***Методами*** - `public getName() => this.name;`
+	* ***Событиями*** - ???
+```php
+// ------------- Пример объявления класса Person + (поля, свойства, конструктор, метод)-------------
+class Person {
+  public string name; // поле name
+  //public int age;   // поле age создается автоматически ниже
+
+  public string Name {         // свойство для поля name
+    get { return name };
+    set { name = value }; 
+  }
+  public int Age { get; set; } // свойство для поля age (создает поле age)
+
+  public Person() { name = "Неизвестно"; age = 18; } // конструктор
+
+  public void GetInfo() { Console.WriteLine($"Имя: {name}  Возраст: {age}"); } // метод
+}
+```
+
+#### Ключевое слово this в классах
+* Слово ***this*** ссылается на текущий экземпляр класса
+* Слово ***this*** в основном используется для :
+	* ***1) Квалификации элементов***, скрытых одинаковыми именами
+	* ***2) Передачи*** другим ***методам*** объекта в качестве параметра
+	* ***3) Создания цепочки конструкторов (Constructor chaining)***
+```php
+// ------ 1) Квалификация элементов ------
+// Конструктор
+public SomeClass(string name, int age) {
+	// присваиваем значение аргументов, полям класса
+	this.name = name;
+	this.age = age;
+}
+
+// ------ 2) Передача методам ------
+// Метод1 внутри класса
+public void method1() {
+	// передача объекта класса в метод2 в виде параметра
+	method2(this);
+}
+private void method2(SomeClass classObject) {
+	// code..
+}
+
+// ------ 3) Создания цепочки конструкторов (Constructor chaining) ------
+// --- Принцип работы Constructor chaining ---
+// 1) Создание нескольких конструкторов
+// 2) Вызов одного конструктора из другого : UserInfo() : this()
+
+// class UserInfo; поля: Name, Family, Age
+// создание "цепочки" конструкторов
+public UserInfo() : this("None","None",0) {}
+public UserInfo(UserInfo obj) : this(obj.Name, obj.Family, obj.Age) {}
+public UserInfo(string Name, string Family, int Age) {
+	this.Name = Name;
+	this.Family = Family;
+	this.Age = Age;
+}
+
+// Использование в программе
+UserInfo ui1 = new UserInfo();
+UserInfo ui2 = new UserInfo("Alex", "Green", 25);
+UserInfo ui3 = new UserInfo(ui2);
+
+// ЗАМЕЧАНИЕ : Начиная с версии .NET 4.0 цепочки можно заменить на необязательные аргументы
+
+```
+
+#### Инициализаторы объектов
+* Передача в `{}` скобках значений доступным полям и свойствам объекта
+```php
+class Person() {
+	public string name;
+	public int age;
+	private int height;
+}
+
+Person p = new Person { name = "Tom", age = 32 }; // верно
+Person p = new Person { name = "Tom", age = 32, height = 160 }; // Ошибка! height-недоступен
+
+```
+
+#### Организация памяти в .NET [Пример](http://stormy-lake-9982.herokuapp.com/assets/Stack%20and%20Heap-0714abf8c6b49cc57365a4aafbba510c.png)
+* Память делится на два типа
+	* ***Стек*** - В стеке хранятся `типы значений` и `ссылки на адреса в куче`
+	* ***Куча(heap)*** - В хипе хранятся `ссылочные типы` на которые указывают ссылки из ***Стека***
+* Если из ***Стека*** удаляются все ссылки на объект, автоматический `сборщик мусора` удаляет объект из кучи и очищает память
+
+
+#### Типы значений и ссылочные типы
+* Типы значений :
+	* Целочисленные типы (`byte, sbyte, char, short, ushort, int, uint, long, ulong`)
+	* Типы с плавающей запятой (float, double)
+	* decimal
+	* bool
+	* enum
+	* Структуры (struct)
+
+* Ссылочные типы :
+	* Object
+	* string
+	* Классы (class)
+	* Интерфейсы (interface)
+	* Делегаты (delegate)
+
+#### Передача параметров по значению и по ссылке (***ref***)
+* Передача параметров :
+	* ***По значению*** :
+		* Передается копия ссылки на объект.
+		* Изменяет поля и свойства объекта, но не сам объект.
+	* ***По ссылке***(ключевое слово ***ref***) :
+		* Передается сама ссылка на объект.
+		* Изменяет как поля и свойства, так и сам объект.
+```php
+Person p = new Person { name = "Tom", age = 23 };
+
+// ------ 1) Передача параметров по значению ------
+ChangePerson(p);
+
+public void ChangePerson(Person person) {
+	person.name = "Alice";                           // Изменит в p.name Tom на Alice
+	person = new Person { name = "Bill", age = 45 }; // Не изменит в p ничего
+}
+
+// ------ 2) Передача параметров по ссылке ------
+ChangePerson(ref p);
+
+public void ChangePerson(ref Person person) {
+	person.name = "Alice";                           // Изменит в p.name Tom на Alice
+	person = new Person { name = "Bill", age = 45 }; // Изменит весь объект p
+}
+```
+
+#### Модификаторы доступа (допустимая область видимости)
+* ***Пространства имен*** (`namespace`) не имеют ограничений доступа
+* В C# применяются модификаторы :
+	* ***public*** : Неограниченный доступ
+	* ***private*** : Доступ ограничен содержащим типом
+	* ***protected*** : Доступен из любого места в текущем классе или в производных классах
+	* ***internal*** : Доступ ограничен текущей сборкой
+	* ***protected internal*** : Доступен из текущей сборки и из производных классов
+	* ***private protected*** (C# v7.2) : Доступен в текущем классе или производных, той же сборки
+* Классы объявленные без модификатора по умолчанию имеют доступ ***internal***
+* Классы созданные в `пространстве имен` и не вложенные в другие классы могут быть либо ***public***, либо ***internal***
+
+<table>
+	<tr>
+		<th>Члены типа</th>
+		<th>Доступность по умолчанию</th>
+		<th>Варианты доступности</th>
+	</tr>
+	<tr>
+		<td>enum</td>
+		<td>public</td>
+		<td>Нет</td>
+	</tr>
+	<tr>
+		<td>class</td>
+		<td>private</td>
+		<td>Все</td>
+	</tr>
+	<tr>
+		<td>interface</td>
+		<td>public</td>
+		<td>Нет</td>
+	</tr>
+	<tr>
+		<td>struct</td>
+		<td>private</td>
+		<td>public, internal, private</td>
+	</tr>
+</table>
+
+#### Свойства (специальные методы доступа)
+* Доступ к полям класса - `get; set;`
+```php
+class Person {
+  private string name;
+  public string Name {
+    get { return name; }
+    set { name = value; } // value представляет передаваемое значение
+  }
+}
+Person p = new Person();
+p.Name = "Tom";          // вызывает Name.set
+string perName = p.Name; // вызывает Name.get
+```
+* Доступ к полю может быть ограничен одним из методов `get` или `set`
+```php
+// --- только метод get ---
+public string Name {   // поле name без метода set
+  get { return name; } // можно получить, нельзя изменить
+}
+// --- только метод set ---
+public int Age {       // поле age без метода get
+  set { age = value; } // можно изменить, нельзя получить
+}
+```
+* Модификатор доступа(МД) для ***свойства***
+	* Можно установить только когда есть и `get` и `set`
+	* Только один блок `get` или `set` может иметь МД, но не оба сразу
+	* МД блока `get` или `set` должен быть более ограничивающим, чем МД ***свойства***
+* Сокращенная запись свойств :
+```php
+private string name;
+
+// эквивалентно public string Name { get { return name; } }
+public string Name => name;
+```
+
+
+#### Автоматические свойства(АС)
+* Сокращенное объявление АС :
+	* Сокращает запись объявления свойств
+	* Убирает необходимость объявления одноименных полей
+```php
+class Person {
+  public string Name { get; set; } // АС Name + создание поля (string)name
+  public int Age { get; set; }     // АС Age  + создание поля (int)age
+
+  public Person(string name, int age) {
+    Name = name;
+    Age = age;
+  }
+}
+```
+* АС можно присвоить значения по умолчанию(инициализация АС) :
+```php
+public string Name { get; set; } = "Tom"; // name = "Tom"
+public int Age { get; set; } = 23;        // age = 23
+```
+* АС с МД :
+```php
+public string Name { get; private set; }
+```
+* АС без блока set :
+```php
+public string Name { get; } = "Tom";
+```
