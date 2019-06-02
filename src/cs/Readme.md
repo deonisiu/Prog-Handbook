@@ -784,7 +784,6 @@ private string name;
 public string Name => name;
 ```
 
-
 #### Автоматические свойства(АС)
 * Сокращенное объявление АС :
 	* Сокращает запись объявления свойств
@@ -813,3 +812,24 @@ public string Name { get; private set; }
 ```php
 public string Name { get; } = "Tom";
 ```
+
+#### Перегрузка методов
+* Перегрузка - методы с разной сигнатурой :
+  * Количество параметров
+  * Типы параметров
+  * Порядок параметров
+  * Модификаторы параметров
+```php
+public void Add(int a, int b) {}                        // сигнатура : Add(int, int)
+public void Add(int a, int b, int c) {}                 // сигнатура : Add(int, int, int)
+public int Add(int a, int b, int c, int d) {return int} // сигнатура : Add(int, int, int, int)
+public void Add(double a, double b) {}                  // сигнатура : Add(double, double)
+public void Add(ref int a, ref int b) {}                // сигнатура : Add(ref int, ref int)
+```
+
+#### Модификатор static (статические элементы СЭ)
+* Статические поля, методы и свойства относятся ко всему классу
+* Для обращения к СЭ не нужно создавать экземпляр класса.
+* Для СЭ будет создаваться участок в памяти, общий для всех объектов класса. [Рисунок](https://metanit.com/sharp/tutorial/pics/static.png)
+* Память для СЭ выделяется, даже если не создано ни одного объекта
+...Статические свойства и методы...
