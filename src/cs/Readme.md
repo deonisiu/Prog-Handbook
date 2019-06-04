@@ -1,5 +1,9 @@
 # C# Изучение
 
+## Дополнительные разделы
+* [Вопросы для самопроверки ](cs_questions.md)
+* [Основные понятия](cs_definition.md)
+* [____](____)
 ---
 ## <a name="0">Навигация</a>
 * [Понятия](#1)
@@ -295,7 +299,7 @@ string result = (55 > 60)  ? "Wrong!" : "Right!"; // result = "Right!"
 int[] numbers = new int[] {1,2,3,4,5};
 
 foreach (int i in numbers) {
-	Consoole.WriteLine(i);
+	Console.WriteLine(i);
 }
 ```
 
