@@ -65,6 +65,9 @@
     * [Статические поля обобщенных классов](#3_24_2)
     * [Использование нескольких универсальных параметров](#3_24_3)
     * [Обобщенные методы](#3_24_4)
+  * [Ограничения обобщений](#3_25)
+  * [Наследование обобщенных типов](#3_26)
+    * [Сочетание своих параметров и базового класса](#3_26_1)
 
 ---
 ## [&uarr;](#0)  <a name="1">Понятия</a>
@@ -1368,4 +1371,104 @@ Swap<int>(ref x, ref y); // x = 25, y = 7
 string s1 = "hello";
 string s2 = "bye";
 Swap<string>(ref s1, ref s2); // s1 = bye, s2 = hello
+```
+
+#### [&uarr;](#3_s)  <a name="3_25">Ограничения обобщений (ОО)</a>
+* Через ОО можно конкретизировать тип `Т`
+* Синтаксис:
+```php
+class Transaction<T> where T : Account {...}
+```
+* В ОО используются типы :
+  * Классы
+  * Интерфейсы
+  * Универсальные параметры :
+    * class
+    * struct
+    * new() - тип имеющий public конструктор без параметров
+```php
+class Account<T> where T : struct {...} // только структуры
+class Account<T> where T : class  {...} // только классы
+class Account<T> where T : new()  {...} // классы и структуры с public конструктором без параметров
+
+```
+* При указании класса в ОО, `T` может быть либо этим классом, либо его наследниками
+```php
+class Account {...}
+class DepositAcc : Account {...}
+class DemandAcc  : Account {...}
+class Transaction<T> where T : Account {...}
+
+Transaction<Account>    tran1 = new Transaction<Account>;      // верно
+Transaction<DepositAcc> tran2 = new Transaction<DepositAcc>;   // тоже верно
+Transaction<DemandAcc>  tran3 = new Transaction<DemandAcc>;    // тоже верно
+```
+* В ОО можно использовать обобщенный класс
+```php
+class Transaction<T> where T : Account<int> {...}
+Transaction<Account<int>>    tran1 = new Transaction<Account<int>>;    // верно
+Transaction<Account<string>> tran1 = new Transaction<Account<string>>; // ошибка
+```
+* При нескольких ограничениях за раз, должен быть порядок следования :
+  1. Название класса, class, struct (одновременно только одно)
+  2. Название интерфейса
+  3. new()
+```php
+class Transaction<T> where T : Person, IAccount, new()
+```
+* Несколько универсальных параметров в ОО
+```php
+class Transaction<U, V> 
+            where U : Account<int> 
+            where V : struct {
+    ...
+}
+```
+* ОО для методов
+```php
+public static void Transact<T>(T acc1, T acc2, int sum) where T : Account {...}
+```
+
+#### [&uarr;](#3_s)  <a name="3_26">Наследование обобщенных типов(ОТ) </a>
+* Один ОТ может наследоваться от другого ОТ
+* Варианты наследования :
+  * Вариант 1: Создание класса-наследника с тем же типом что и базовый
+  * Вариант 2: Создание необобщенного класса-наследника(для базового класса явно определить тип)
+  * Вариант 3: Типизация отличным от базового параметра типом(для базового класса явно определить тип)
+```php
+//--------- Вариант 1
+class Account<T> {...}
+class Account2<T> : Account<T> {...}
+
+// применение
+Account<string> acc1 = new Account<string>();
+Account<int>    acc2 = new Account2<int>();
+Account2<int>   acc3 = new Account2<int>();
+
+//--------- Вариант 2
+class StringAccount : Account<string> {
+  public StringAccount(string id) : base(id) {...}
+}
+
+// применение
+StringAccount   acc4 = new StringAccount("453"); // верно
+Account<string> acc5 = new StringAccount("664"); // верно
+Account<int>    acc6 = new StringAccount("664"); // ошибка
+
+//--------- Ваоиант 3
+class IntAccount<T> : Account<int> {...} // тип Т может не совпадать с int
+
+// применение
+IntAccount<string> acc7 = new IntAccount<string>();
+Account<int> acc8 = new IntAccount<long>();
+```
+
+##### [&uarr;](#3_s)  <a name="3_26_1">Сочетание своих параметров и базового класса</a>
+```php
+class MixedAccount<T, K> : Account<T>
+            where T : struct {...}
+
+// применение
+MixedAccount<string, int> acc9 = new MixedAccount<string, int>();
+Account<string> acc10 = MixedAccount<string, int>();
 ```
