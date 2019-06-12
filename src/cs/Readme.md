@@ -1,8 +1,9 @@
 # C# Изучение
 
 ## Дополнительные разделы
-* [Вопросы для самопроверки ](cs_questions.md)
-* [Основные понятия](cs_definition.md)
+* [Вопросы для самопроверки ](questions.md)
+* [Основные понятия](definition.md)
+* [Конспект по курсу "Продвинутый C# Шаг1"](synopsis1.md)
 * [____](____)
 ---
 ## <a name="0">Навигация</a>
@@ -785,6 +786,27 @@ public void ChangePerson(ref Person person) {
 </table>
 
 #### [&uarr;](#3_s)  <a name="3_7"> Свойства (специальные методы доступа)</a>
+* По сути синтаксический сахар уменьшающий количество ручного кода
+* Суть действия :
+```php
+// При создании свойства Speed
+class Example {
+  public int Speed { get; private set; } // создание свойства
+}
+
+// По факту получаем
+class Example {
+  private int _speed;
+
+  public int get_Speed() {
+    return _speed;
+  }
+
+  private void set_Speed() {
+    _speed = value;
+  }
+}
+```
 * Доступ к полям класса - `get; set;`
 ```php
 class Person {
