@@ -93,6 +93,34 @@
   * [Генерация исключения и оператор throw](#4_6)
 </details>
 
+<details>
+  <summary><b>Обработка исключений</b></summary>
+
+  * [Интерфейсы](#5)
+  * [Введение в интерфейсы](#5_1)
+    * [Множественная реализация интерфейсов](#5_1_1)
+    * [Интерфейсы в преобразованиях типов](#5_1_2)
+  * [Наследование интерфейсов](#5_2)
+    * [Изменение реализации интерфейсов в производных классах](#5_2_1)
+    * [Явная реализация интерфейсов (ЯРИ)](#5_2_2)
+  * [Интерфейсы в обобщениях](#5_3)
+    * [Обобщенные интерфейсы](#5_3_1)
+  * [Копирование объектов. Интерфейс ICloneable](#5_4)
+  * [Сортировка объектов. Интерфейс IComparable](#5_5)
+    * [Применение компаратора](#5_5_1)
+  * [Ковариантность и контравариантность обобщенных интерфейсов](#5_6)
+    * [Ковариантные интерфейсы](#5_6_1)
+    * [Контравариантные интерфейсы](#5_6_2)
+</details>
+
+<details>
+  <summary><b>Обработка исключений</b></summary>
+
+  * [_____](#6)
+  * [_____](#6_1)
+
+</details>
+
 ---
 ## [&uarr;](#0)  <a name="1">Понятия</a>
 ### [&uarr;](#0)  <a name="1_1">1) Составное форматирование - строка с индексированными местозаполнителями</a>
@@ -1803,6 +1831,7 @@ class myClass : Interface1, Interface2, Interface3 {
 #### [&uarr;](#5_s)  <a name="5_1_2">Интерфейсы в преобразованиях типов</a>
 * Преобразования типов характерны и для интерфейсов
 * Преобразование от класса к его интерфейсу, выполняется автоматически
+* Преобразование от интерфейса к классу, выполняется с обязательным приведением типа
 ```c#
 interface IAccount {
   int CurrentSum { get; }  // Текущая сумма на счету
@@ -1842,3 +1871,397 @@ Client client = (Client)account;
 string clientName = ((Client)account).Name;
 ```
 
+#### [&uarr;](#5_s)  <a name="5_2">Наследование интерфейсов</a>
+* ***interface*** не может иметь модификатор ***sealed***
+* ***interface*** может наследоваться также как классы
+```java
+interface IAction {
+  void Move();
+}
+interface IRunAction : IAction {
+  void Run();
+}
+class BaseAction : IRunAction {
+  public void Move() {...}
+  public void Run() {...}
+}
+```
+* Класс должен реализовать методы всех унаследованных интерфейсов
+* Можно применять модификатор ***abstract***
+* Можно использовать сокрытие методов (***new***)
+```java
+interface IAction {
+  void Move();
+}
+interface IRunAction : IAction {
+  new void Move();
+}
+```
+* Модификаторы доступа работают также как у классов. По умолчанию ***internal***
+
+#### [&uarr;](#5_s)  <a name="5_2_1">Изменение реализации интерфейсов в производных классах</a>
+* Вариант 1 - переопределение виртуальных/абстрактных методов
+```java
+interface IAction {
+  void Move();
+}
+class BaseAction : IAction {
+  public virtual void Move() {...}
+}
+class HeroAction : BaseAction {
+  public override void Move() {...}
+}
+// применение
+BaseAction action1 = new HeroAction();
+action1.Move(); // Move in HeroAction
+
+IAction action2 = new HeroAction();
+action2.Move(); // Move in HeroAction
+```
+* Вариант 2 - сокрытие метода в производном классе
+```java
+interface IAction {...}
+class BaseAction : IAction {
+  public void Move() {...}
+}
+class HeroAction : BaseAction {
+  public new void Move() {...}
+}
+// применение
+BaseAction action1 = new HeroAction();
+action1.Move(); // Move in BaseAction
+
+IAction action2 = new HeroAction();
+action2.Move(); // Move in BaseAction
+```
+* Вариант 3 - повторная реализация интерфейса в классе-наследнике
+```java
+interface IAction {...}
+class BaseAction : IAction {...}
+class HeroAction : BaseAction, IAction {
+  public new void Move() {...}
+}
+// применение
+BaseAction action1 = new HeroAction();
+action1.Move(); // Move in BaseAction
+
+IAction action2 = new HeroAction();
+action2.Move(); // Move in HeroAction
+```
+
+#### [&uarr;](#5_s)  <a name="5_2_2">Явная реализация интерфейсов (ЯРИ)</a>
+* Указывается название элемента вместе с названием интерфейса
+* Не может быть модификатора ***public***
+```java
+interface IAction { void Move(); }
+class BaseAction : IAction {
+  void IAction.Move() {...}
+}
+```
+* При ЯРИ элементы не являются частью интерфейса класса
+* Через объект класса напрямаую обратиться нельзя
+```java
+BaseAction action = new BaseAction();
+((IAction)action).Move(); // необходимо приведение к типу IAction
+
+// или так
+IAction action2 = new BaseAction();
+action2.Move();
+```
+* Применение ЯРИ : При нескольких интерфейсах с одинаковыми методами
+```java
+interface ISchool { void Study(); }
+interface IUniversity { void Study(); }
+class Person : ISchool, IUniversity {
+  void ISchool.Study() {...}
+  void IUniversity.Study() {...}
+}
+// использование
+Person p = new Person();
+((ISchool)p).Study();
+((IUniversity)p).Study();
+```
+* Применение ЯРИ : Когда в базовом классе уже реализован интерфейс, но в производном классе нужно изменить его
+```java
+interface IAction { void Move(); }
+class BaseAction : IAction {
+  public void Move() {
+    Console.WriteLine("Move in BaseAction");
+  }
+}
+class HeroAction : BaseAction, IAction {
+  void IAction.Move() {
+    Console.WriteLine("Move in HeroAction");
+  }
+}
+// применение
+HeroAction action1 = new HeroAction();
+action1.Move();             // Move in BaseAction
+((IAction)action1).Move();  // Move in HeroAction
+
+IAction action2 = new HeroAction();
+action2.Move();             // Move in HeroAction
+```
+
+#### [&uarr;](#5_s)  <a name="5_3">Интерфейсы в обобщениях</a>
+* Интерфейс может выступать в роли ограничения обобщения. Можно указать несколько интерфейсов.
+```java
+interface IAccount {
+  int CurrentSum { get; }
+  void Put(int sum);
+  void Withdraw(int sum);
+}
+interface IClient {
+  string Name { get; set; }
+}
+class Client : IAccount, IClient {
+  int _sum;
+  public Client(string name, int sum) { Name = name; _sum = sum; }
+  public string Name { get; set; }
+  public int CurrentSum { get { return _sum } }
+  public void Put(int sum) { _sum += sum; }
+  public void Withdraw(int sum) { if(sum <= _sum ) _sum -= sum; }
+}
+// тип T реализует сразу два интерфейса 
+class Transaction<T> where T : IAccount, IClient {
+  public void Operate(T acc1, T acc2, int sum) {
+    if(acc1.CurrentSum >= sum) {
+      acc1.Withdraw(sum);
+      acc2.Put(sum);
+    }
+  }
+}
+// использование
+Client account1 = new Client("Tom", 200);
+Client account2 = new Client("Bob", 300);
+Transaction<Client> transaction = new Transaction<Client>();
+transaction.Operate(account1, account2, 150);
+
+//-------------------------------------------
+// Также Т может представлять интерфейс, который наследуется от двух интерфейсов
+interface IClientAccount : IAccount, IClient {...}
+class ClientAccount : IClientAccoun {
+  int _sum;
+  public Client(string name, int sum) { Name = name; _sum = sum; }
+  public string Name { get; set; }
+  public int CurrentSum { get { return _sum } }
+  public void Put(int sum) { _sum += sum; }
+  public void Withdraw(int sum) { if(sum <= _sum ) _sum -= sum; }
+}
+// использование
+IClientAccount account3 = new ClientAccount("Alice", 400);
+IClientAccount account4 = new ClientAccount("Kate", 500);
+Transaction<IClientAccount> operation = new Transaction<IClientAccount>();
+operation.Operate(account3, account4, 200);
+```
+
+#### [&uarr;](#5_s)  <a name="5_3_1">Обобщенные интерфейсы</a>
+* Как и классы могут быть обобщенными
+```java
+interface IUser<T> { T id { get; } }
+class User<T> : IUser<T> {
+  T _id;
+  public User(T id) { _id = id; }
+  public T Id { get { return _id; } }
+}
+// использование
+IUser<int> user1 = new User<int>(1512);         // user1.Id = 1512
+IUser<string> user2 = new User<string>("1255"); // user2.Id = "1255"
+```
+* Также можно явно указать используемый тип для Т
+```java
+class IntUser : IUser<int> {
+  int _id;
+  public IntUser(int id) { _id = id; }
+  public int Id { get { return _id; } }
+}
+```
+
+#### [&uarr;](#5_s)  <a name="5_4">Копирование объектов. Интерфейс ICloneable</a>
+* Для копирования объекта класса используется интерфейс ICloneable
+```java
+public interface ICloneable {
+  object Clone();
+}
+class Company {
+  public string Name { get; set; }
+}
+class Person : ICloneable {
+  public string Name { get; set; }
+  public int Age { get; set; }
+  public Company Work { get; set; }
+  public object Clone() {
+    return new Person { Name = this.Name, Age = this.Age };
+  }
+}
+// использование
+Person p1 = new Person { Name = "Tom", Age = 23 };
+Person p2 = (Person)p1.Clone(); // создание нового объекта p2 с данными из p1 
+p2.Name = "Alice"; // p1.Name = "Tom"
+```
+* Два типа копирования :
+  * Поверхностное(неглубокое) копирование :
+    * Копировать нужно только примитивные типы данных
+    * Специальный метод ***MemberwiseClone()***
+  * Глубокое копирование :
+    * Копировать нужно ссылочные типы данных
+```java
+// при поверхностном копировании (только примитивные типы)
+// вместо
+public object Clone() {
+  return new Person { Name = this.Name, Age = this.Age };
+}
+// можно записать так
+public object Clone() {
+  return this.MemberwiseClone();
+}
+
+// при глубоком копировании нужно присваивать все элементы вручную
+public object Clone() {
+  Company company = new Company { Name = this.Work.Name };
+  return new Person {
+    Name = this.Name,
+    Age = this.Age,
+    Work = company
+  };
+}
+```
+
+#### [&uarr;](#5_s)  <a name="5_5">Сортировка объектов. Интерфейс IComparable</a>
+* Для сортировки примитивных типов данных метод ***Sort()***
+```java
+int[] numbers = new int[] { 97, 45, 32, 65, 83, 23, 15 };
+Array.Sort(numbers); // 15, 23, 32, 45, 65, 83, 97
+```
+* Для сортировки сложных объектов интерфейс ***IComparable***
+```java
+// имеет всего один метод
+public interface IComparable {
+  int CompareTo(object obj);
+}
+```
+* Сравнение текущего объекта с объектом obj из параметра
+* Возвращает один из трех вариантов числа типа ***int*** :
+  * ***> 0*** - ***this*** должен быть перед объектом из параметра
+  * ***= 0*** - оба объекта равны
+  * ***< 0*** - ***this*** должен быть после объекта из параметра
+* Обобщенная версия ***IComparable*** :
+```java
+class Person : IComparable<Person> {
+  public string Name { get; set; }
+  public int Age { get; set; }
+  public int CompareTo(Person p) {
+    return this.Name.CompareTo(p.Name);
+  }
+}
+```
+
+#### [&uarr;](#5_s)  <a name="5_5_1">Применение компаратора</a>
+* Компаратор - ***IComparer*** - сравнивает два объекта obj1, obj2
+```java
+interface IComparer {
+  int Compare(object obj1, object obj2);
+}
+```
+* Возвращает один из трех вариантов числа типа ***int*** :
+  * ***> 0*** - ***obj1*** > ***obj2***
+  * ***= 0*** - оба объекта равны
+  * ***< 0*** - ***obj1*** < ***obj2***
+```java
+class PeopleComparer : IComparer<Person> {
+  public int Compare(Person p1, Person p2) {
+    if(p1.Nme.Length > p2.Name.Length) 
+      return 1;
+    else if(p1.Name.Length < p2.Name.Length) 
+      return -1;
+    return 0;
+  }
+}
+// использование
+Person p1 = new Person { Name = "Bill", Age = 34 };
+Person p2 = new Person { Name = "Tom", Age = 24 };
+Person p3 = new Person { Name = "Alice", Age = 14 };
+
+Person[] people = new Person[] { p1, p2, p3 };
+
+// before [ "Bill", "Tom", "Alice" ]
+Array.Sort(people, new PeopleComparer());
+// after [ "Tom", "Bill", "Alice" ]
+```
+
+#### [&uarr;](#5_s)  <a name="5_6">Ковариантность и контравариантность обобщенных интерфейсов</a>
+* Возможность использовать вместо одного типа другой, который выше или ниже в иерархии наследования
+* Три варианта поведения с .NET 4.0
+  * Ковариантность : более конкретный тип, чем заданный изначально
+  * Контравариантность : более универсальный тип, чем заданный
+  * Инвариантность : только заданный тип
+* По умолчанию все обобщенные интерфейсы = ***инвариантным***
+```java
+class Account {
+  public virtual void DoTransfer(int sum) {
+    Console.WriteLine($"Клиент положил на счет {sum} долларов");
+  }
+}
+class DepositAccount : Account {
+  public override void DoTransfer(int sum) {
+    Console.WriteLine($"Клиент положил на депозитный счет {sum} долларов")
+  }
+}
+```
+
+#### [&uarr;](#5_s)  <a name="5_6_1">Ковариантные интерфейсы</a>
+* К универсальному параметру добавляется ***out***
+```java
+interface IBank<out T> 
+{
+  T CreateAccount(int sum);
+}
+
+class Bank<T> : IBank<T> where T : Account, new() 
+{
+  public T CreateAccount(int sum) 
+  {
+    T acc = new T(); // создаем счет
+    acc.DoTransfer(sum);
+    return acc;
+  }
+}
+// использование
+IBank<DepositAccount> depositBank = new Bank<DepositAccount>();
+Account acc1 = depositBank.CreateAccount(34);
+
+IBank<Account> ordinaryBank = new Bank<DepositAccount>(); // без out тут будет ошибка
+// или так
+// IBank<Account> ordinryBank = depositBank;
+Account acc2 = ordinaryBank.CreateAccount(45);
+```
+
+#### [&uarr;](#5_s)  <a name="5_6_2">Контравариантные интерфейсы</a>
+* К универсальному параметру добавляется ***in***
+```java
+interface ITransaction<in T> 
+{
+  void DoOperation(T account, int sum);
+}
+
+class Transaction<T> : ITransaction<T> where T : Account 
+{
+  public void DoOperation(T account, int sum) 
+  {
+    account.DoTransder(sum);
+  }
+}
+// использование 
+ITransaction<Account> accTransaction = new Transaction<Account>();
+accTransaction.DoOperation(new Account(), 400);
+
+// контравариантность дает возможность привести объект Transaction<Account> к типу ITransaction<DepositAccount>
+ITransaction<DepositAccount> depAccTransaction = new Transaction<Account>(); // без in тут будет ошибка
+depAccTransaction.DoOperation(new DepositAccount(), 450);
+```
+
+### [&uarr;](#6_s)  <a name="6">Делегаты, события и лямбды</a>
+
+### [&uarr;](#6_s)  <a name="6_1">Делегаты</a>
+* Объекты указывающие на методы (указатели на методы)
+* Через делегаты можно вызывать методы
